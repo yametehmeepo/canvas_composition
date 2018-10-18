@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>canvas制作运动的小球-理解globalCompositeOperation属性</title>
+	<style>
+		#buttons a + a{
+			margin-left: 8px;
+		}
+	</style>
+</head>
+<body>
+	<div id="buttons" style="text-align: center">
+		<button>停止运动</button>
+		<button>继续运动</button>
+		<button>原始模式</button>
+		<button>lighter模式</button>
+		<button>xor模式</button>
+	</div>
+	<canvas id="canvas" style="border: 1px solid #eee; display: block; margin:20px auto;">canvas</canvas>
+	<script>
+		var balls = [];
+		var windowW = 800;
+		//var windowW = 1200;//canvas宽
+		var windowH = 800;//canvas高
+		var timer = null;
+		var compositeStyle = 'source-over';
+		window.onload = function(){
+			var canvas = document.getElementById('canvas');
+			canvas.width = windowW;
+			canvas.height = windowH;
+			var context = canvas.getContext('2d');
+			renderBalls();
+			timer = setInterval(function(){
+				drawBalls(context, compositeStyle);
+				updataBalls(context);
+			}, 20);
+			var buttons = document.getElementById('buttons').getElementsByTagName('button');
+			for(var i = 0; i < buttons.length; i++){
+				buttons[i].onclick = function(){
+					switch(this.innerHTML){
+						case '停止运动':
+							clearInterval(timer);
+							timer = null;
+							break;
+						case '继续运动':
+							if(!timer){
+								timer = setInterval(function(){
+									drawBalls(context, compositeStyle);
+									updataBalls(context);
+								}, 20);
+							}
+							break;
+						case '原始模式':
+							compositeStyle = 'source-over';
+							clickandanimation(context);
+							break;
+						case 'lighter模式':
+							compositeStyle = 'lighter';
+							clickandanimation(context);
+							break;
+						case 'xor模式':
+							compositeStyle = 'xor';
+							clickandanimation(context);
+							break;
+					}
+				}
+			}
+		}
+
+		function clickandanimation(context){
+			clearInterval(timer);
+			timer = setInterval(function(){
+				drawBalls(context, compositeStyle);
+				updataBalls(context);
+			}, 20);
+			return false
+		}
+
+		function updataBalls(cxt){
+			var w = cxt.canvas.width;
+			var h = cxt.canvas.height;
+			for(var i = 0; i < balls.length; i++){
+				balls[i].x += balls[i].vx;
+				balls[i].y += balls[i].vy;
+				if(balls[i].x <= balls[i].r){
+					balls[i].x = balls[i].r;
+					balls[i].vx = -balls[i].vx;
+				}
+				if(balls[i].x >= w - balls[i].r){
+					balls[i].x = w - balls[i].r;
+					balls[i].vx = -balls[i].vx;
+				}
+				if(balls[i].y <= balls[i].r){
+					balls[i].y = balls[i].r;
+					balls[i].vy = -balls[i].vy;
+				}
+				if(balls[i].y >= h - balls[i].r){
+					balls[i].y = h - balls[i].r;
+					balls[i].vy = -balls[i].vy;
+				}
+			}
+		}
+
+		function drawBalls(cxt, composite){
+			cxt.clearRect(0, 0, cxt.canvas.width, cxt.canvas.height);
+			cxt.globalAlpha = 1;
+			cxt.globalCompositeOperation = composite;
+			for(var i = 0; i < balls.length; i++){
+				cxt.beginPath();
+				cxt.arc(balls[i].x, balls[i].y, balls[i].r, 0, 2*Math.PI);
+				cxt.closePath();
+				cxt.fillStyle = balls[i].color;
+				cxt.fill();
+			}
+		}
+
+		function renderBalls(){
+			for(var i = 0; i < 50; i++){
+				var R = Math.floor(Math.random()*255);
+				var G = Math.floor(Math.random()*255);
+				var B = Math.floor(Math.random()*255);
+				var a = 1;
+				var r = Math.random()*20 + 40;
+				var X = Math.random()*(windowW - 2*r) + r;
+				var Y = Math.random()*(windowH - 2*r) + r;
+				var color = 'rgb(' + R + ',' + G + ','+ B + ',' + a + ')';
+				var vx =( Math.random()*5 + 5) * Math.pow(-1, Math.ceil(Math.random()*100));
+				var vy =( Math.random()*5 + 5) * Math.pow(-1, Math.ceil(Math.random()*100));
+				balls.push({
+					x: X,
+					y: Y,
+					r: r,
+					vx: vx,
+					vy: vy,
+					color: color
+				})
+			}
+		}
+	</script>
+</body>
+</html>
