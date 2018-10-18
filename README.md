@@ -1,1 +1,2 @@
 # canvas_composition
+制作一个动画效果,深度理解canvas中2d上下文里的globalCompositeOperation属性
